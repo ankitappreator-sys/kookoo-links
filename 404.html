@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Opening KooKoo...</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0f0f1a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 24px;
+    }
+    .icon { font-size: 72px; margin-bottom: 20px; }
+    h1 { font-size: 26px; font-weight: 700; margin-bottom: 10px; }
+    p { color: #888; font-size: 15px; margin-bottom: 32px; line-height: 1.5; }
+    .btn {
+      display: inline-block;
+      background: #6c63ff;
+      color: white;
+      padding: 14px 36px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="icon">🐦</div>
+  <h1>Opening KooKoo...</h1>
+  <p>If the app doesn't open automatically,<br>download it from the store below.</p>
+  <a id="storeBtn" class="btn" href="#">Download KooKoo</a>
+
+  <script>
+    var ua = navigator.userAgent.toLowerCase();
+    var isAndroid = ua.indexOf('android') > -1;
+    var isIOS = /iphone|ipad|ipod/.test(ua);
+
+    // Set store button
+    var btn = document.getElementById('storeBtn');
+    if (isAndroid) {
+      btn.href = 'https://play.google.com/store/apps/details?id=in.co.kookoo';
+      btn.textContent = 'Get on Google Play';
+    } else if (isIOS) {
+      btn.href = 'https://apps.apple.com/in/app/id6446690009';
+      btn.textContent = 'Get on App Store';
+    } else {
+      btn.style.display = 'none';
+    }
+
+    // GitHub Pages serves 404.html for unknown paths.
+    // Full URL example:
+    //   https://kookooapp.github.io/kookoo-links/user/4
+    // pathname = /kookoo-links/user/4
+    // We strip the repo prefix and parse type + id.
+    var pathname = window.location.pathname;
+
+    // Remove leading slash and split
+    var parts = pathname.replace(/^\//, '').split('/');
+    // parts[0] = "kookoo-links" (repo name) — skip it
+    // parts[1] = "user" or "video"
+    // parts[2] = "4" or "abc123"
+    var type = parts[1];
+    var id   = parts[2];
+
+    if ((type === 'user' || type === 'video') && id && id.length > 0) {
+      var deepLink = 'kookoo://' + type + '/' + id;
+
+      // Try to open the app immediately
+      window.location = deepLink;
+
+      // Fallback to store after 2.5s if app not installed
+      setTimeout(function () {
+        if (isAndroid) {
+          window.location = 'https://play.google.com/store/apps/details?id=in.co.kookoo';
+        } else if (isIOS) {
+          window.location = 'https://apps.apple.com/in/app/id6446690009';
+        }
+      }, 2500);
+    }
+  </script>
+</body>
+</html>
