@@ -1,90 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Opening KooKoo...</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Opening KooKoo…</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #0f0f1a;
-      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
       text-align: center;
       padding: 24px;
     }
-    .icon { font-size: 72px; margin-bottom: 20px; }
-    h1 { font-size: 26px; font-weight: 700; margin-bottom: 10px; }
-    p { color: #888; font-size: 15px; margin-bottom: 32px; line-height: 1.5; }
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 16px;
+      padding: 40px 32px;
+      max-width: 360px;
+      width: 100%;
+    }
+    .logo {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #58a6ff;
+    }
+    p {
+      font-size: 15px;
+      color: #8b949e;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
     .btn {
       display: inline-block;
-      background: #6c63ff;
-      color: white;
-      padding: 14px 36px;
-      border-radius: 50px;
-      text-decoration: none;
-      font-size: 16px;
+      background: #238636;
+      color: #fff;
+      font-size: 15px;
       font-weight: 600;
+      padding: 12px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      width: 100%;
     }
+    .btn:hover { background: #2ea043; }
+    .store-links {
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .store-link {
+      font-size: 13px;
+      color: #58a6ff;
+      text-decoration: none;
+    }
+    .store-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <div class="icon">🐦</div>
-  <h1>Opening KooKoo...</h1>
-  <p>If the app doesn't open automatically,<br>download it from the store below.</p>
-  <a id="storeBtn" class="btn" href="#">Download KooKoo</a>
+  <div class="card">
+    <div class="logo">🐦</div>
+    <h1>Opening KooKoo</h1>
+    <p id="msg">Redirecting you to the KooKoo app…</p>
+    <button class="btn" id="openBtn" onclick="openApp()">Open in KooKoo</button>
+    <div class="store-links">
+      <a class="store-link" id="playStoreLink" href="https://play.google.com/store/apps/details?id=in.co.kookoo" target="_blank">Get on Android</a>
+      <a class="store-link" id="appStoreLink" href="https://apps.apple.com/app/kookoo/id6741440498" target="_blank">Get on iOS</a>
+    </div>
+  </div>
 
   <script>
-    var ua = navigator.userAgent.toLowerCase();
-    var isAndroid = ua.indexOf('android') > -1;
-    var isIOS = /iphone|ipad|ipod/.test(ua);
+    // ── Parse the path to extract type and id ──────────────────────────────
+    // GitHub Pages 404.html receives the original path in window.location.pathname
+    // e.g. /kookoo-links/user/abc123  or  /kookoo-links/video/xyz789
+    var path = window.location.pathname; // e.g. "/kookoo-links/user/abc123"
+    var segments = path.replace(/^\//, '').split('/');
+    // segments[0] = "kookoo-links", segments[1] = "user"|"video", segments[2] = id
+    var type = segments[1] || '';   // "user" or "video"
+    var id   = segments[2] || '';   // the actual user/video id
 
-    // Set store button
-    var btn = document.getElementById('storeBtn');
-    if (isAndroid) {
-      btn.href = 'https://play.google.com/store/apps/details?id=in.co.kookoo';
-      btn.textContent = 'Get on Google Play';
-    } else if (isIOS) {
-      btn.href = 'https://apps.apple.com/in/app/id6446690009';
-      btn.textContent = 'Get on App Store';
+    var deepLink = '';
+
+    if (type === 'user' && id) {
+      deepLink = 'kookoo://user/' + id;
+      document.getElementById('msg').textContent =
+        'Opening profile in the KooKoo app…';
+    } else if (type === 'video' && id) {
+      deepLink = 'kookoo://video/' + id;
+      document.getElementById('msg').textContent =
+        'Opening video in the KooKoo app…';
     } else {
-      btn.style.display = 'none';
+      document.getElementById('msg').textContent =
+        'This link will open in the KooKoo app.';
     }
 
-    // GitHub Pages serves 404.html for unknown paths.
-    // Full URL example:
-    //   https://kookooapp.github.io/kookoo-links/user/4
-    // pathname = /kookoo-links/user/4
-    // We strip the repo prefix and parse type + id.
-    var pathname = window.location.pathname;
+    function openApp() {
+      if (!deepLink) return;
+      window.location.href = deepLink;
+    }
 
-    // Remove leading slash and split
-    var parts = pathname.replace(/^\//, '').split('/');
-    // parts[0] = "kookoo-links" (repo name) — skip it
-    // parts[1] = "user" or "video"
-    // parts[2] = "4" or "abc123"
-    var type = parts[1];
-    var id   = parts[2];
-
-    if ((type === 'user' || type === 'video') && id && id.length > 0) {
-      var deepLink = 'kookoo://' + type + '/' + id;
-
-      // Try to open the app immediately
-      window.location = deepLink;
-
-      // Fallback to store after 2.5s if app not installed
+    // Auto-redirect after a short delay so the page is visible briefly
+    if (deepLink) {
       setTimeout(function () {
-        if (isAndroid) {
-          window.location = 'https://play.google.com/store/apps/details?id=in.co.kookoo';
-        } else if (isIOS) {
-          window.location = 'https://apps.apple.com/in/app/id6446690009';
-        }
-      }, 2500);
+        window.location.href = deepLink;
+      }, 800);
     }
   </script>
 </body>
